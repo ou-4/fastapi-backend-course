@@ -1,10 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from storage import FileStorage
+from gist_storage import GistStorage
 
 app = FastAPI()
 
-storage = FileStorage()
+from dotenv import load_dotenv
+load_dotenv()
+
+storage = GistStorage()
 
 
 class CreateTask(BaseModel):
