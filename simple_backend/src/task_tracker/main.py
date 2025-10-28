@@ -49,7 +49,7 @@ def update_task(task_id: int, update_task: UpdateTask):
         if i['id'] == task_id:
             i['task'] = update_task.task
             i['status'] = update_task.status
-            save_tasks(i)
+            save_tasks(tasks)
             return {"success": True}
      
     raise HTTPException(status_code=404, detail = 'Задача не найдена')
