@@ -1,20 +1,29 @@
 import json
-import requests
 import os
+from base_http_client import BaseHTTPClient
 
-class GistStorage:
+class GistStorage(BaseHTTPClient):
     def __init__(self, filename='tasks.json'):
         self.json_name = filename
         self.gist_id = os.getenv('GIST_ID')  
-        self.github_token = os.getenv('GITHUB_TOKEN')  
+        self.github_token = os.getenv('GITHUB_TOKEN')
+        super().__init__()
+    
+    def get_base_url(self) -> str:
+        return "https://api.github.com"
+    
+    def get_headers(self) -> dict:
+        return {
+            "Authorization": f"token {self.github_token}",
+            "Accept": "application/vnd.github.v3+json"
+        }
     
     def load_tasks(self):
         if not self.gist_id or not self.github_token:
             return []
         
         try:
-            headers = {"Authorization": f"token {self.github_token}"}
-            response = requests.get(f"https://api.github.com/gists/{self.gist_id}", headers=headers)
+            response = self.make_request("GET", f"/gists/{self.gist_id}")
             
             if response.status_code == 200:
                 gist_data = response.json()
@@ -37,14 +46,9 @@ class GistStorage:
                 }
             }
             
-            headers = {
-                "Authorization": f"token {self.github_token}",
-                "Content-Type": "application/json"
-            }
-            
-            response = requests.patch(
-                f"https://api.github.com/gists/{self.gist_id}",
-                headers=headers,
+            response = self.make_request(
+                "PATCH", 
+                f"/gists/{self.gist_id}",
                 data=json.dumps(gist_data)
             )
             return response.status_code == 200
